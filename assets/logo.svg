@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <rect width="120" height="120" rx="20" fill="#1a1a2e"/>
+  <path d="M60 15 L95 35 L95 75 L60 95 L25 75 L25 35 Z" fill="none" stroke="#00d4aa" stroke-width="3"/>
+  <path d="M60 15 L60 95 M25 35 L95 35 M25 75 L95 75" stroke="#00d4aa" stroke-width="2" opacity="0.4"/>
+  <circle cx="60" cy="45" r="8" fill="#00d4aa" opacity="0.6"/>
+  <circle cx="60" cy="65" r="6" fill="#00d4aa" opacity="0.4"/>
+  <circle cx="60" cy="80" r="4" fill="#00d4aa" opacity="0.25"/>
+  <text x="60" y="112" text-anchor="middle" fill="#00d4aa" font-family="monospace" font-size="9" font-weight="bold">DBASEMENT</text>
+</svg>
