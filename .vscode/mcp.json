@@ -2,8 +2,8 @@
   "servers": {
     "dbasement": {
       "type": "stdio",
-      "command": "${workspaceFolder}/dbasement.exe",
-      "args": ["--project", "${workspaceFolder}"]
+      "command": "pwsh",
+      "args": ["-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/scripts/start.ps1", "--project", "${workspaceFolder}"]
     }
   }
 }

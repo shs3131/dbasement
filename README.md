@@ -119,18 +119,52 @@ for system-wide access.
 
 ## AI Client Configuration
 
-Configure your AI client to use Dbasement as an MCP server. The examples use
-absolute paths; replace them with your actual binary and project paths.
+Dbasement downloads itself automatically. You don't need Go or to find the
+binary path — just paste one of these configs into your AI client.
+
+> **No Go required. No manual download. No path hunting.** The binary is
+> auto-downloaded from GitHub Releases the first time the server starts.
 
 ### VS Code
 
 Open the project folder. `.vscode/mcp.json` is already included — Dbasement
-appears automatically in VS Code's MCP server list.
+appears automatically in VS Code's MCP list.
+
+### Copy-paste config (works for any client)
+
+Give this to any MCP-compatible AI:
+
+```json
+{
+  "mcpServers": {
+    "dbasement": {
+      "command": "pwsh",
+      "args": ["-ExecutionPolicy", "Bypass", "-File", "scripts/start.ps1", "--project", "."]
+    }
+  }
+}
+```
+
+The AI downloads `dbasement.exe`, starts the memory server. Next session, the
+binary is already there.
+
+### Linux / macOS (cross-platform)
+
+```json
+{
+  "mcpServers": {
+    "dbasement": {
+      "command": "bash",
+      "args": ["scripts/start.sh", "."]
+    }
+  }
+}
+```
 
 ### Claude Code
 
 ```bash
-claude --mcp "C:\path\to\dbasement.exe --project C:\path\to\project"
+claude --mcp "pwsh -ExecutionPolicy Bypass -File scripts/start.ps1 --project ."
 ```
 
 Or in `~/.claude/settings.json`:
@@ -139,8 +173,8 @@ Or in `~/.claude/settings.json`:
 {
   "mcpServers": {
     "dbasement": {
-      "command": "C:\\full\\path\\to\\dbasement.exe",
-      "args": ["--project", "C:\\full\\path\\to\\project"]
+      "command": "pwsh",
+      "args": ["-ExecutionPolicy", "Bypass", "-File", "scripts/start.ps1", "--project", "."]
     }
   }
 }
@@ -152,18 +186,18 @@ Settings → MCP Servers → Add Server:
 
 - **Name**: `dbasement`
 - **Type**: `command`
-- **Command**: `C:\path\to\dbasement.exe --project C:\path\to\project`
+- **Command**: `pwsh -ExecutionPolicy Bypass -File scripts/start.ps1 --project .`
 
 ### Codex CLI
 
-`.codex/mcp.json` in your project root:
+`.codex/mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "dbasement": {
-      "command": "./dbasement",
-      "args": ["--project", "."]
+      "command": "bash",
+      "args": ["scripts/start.sh", "."]
     }
   }
 }
@@ -177,8 +211,8 @@ Settings → MCP Servers → Add Server:
 {
   "mcpServers": {
     "dbasement": {
-      "command": "/full/path/to/dbasement",
-      "args": ["--project", "/full/path/to/project"]
+      "command": "pwsh",
+      "args": ["-ExecutionPolicy", "Bypass", "-File", "scripts/start.ps1", "--project", "."]
     }
   }
 }
@@ -192,8 +226,8 @@ Settings → MCP Servers → Add Server:
 {
   "mcpServers": {
     "dbasement": {
-      "command": "/full/path/to/dbasement",
-      "args": ["--project", "/full/path/to/project"]
+      "command": "pwsh",
+      "args": ["-ExecutionPolicy", "Bypass", "-File", "scripts/start.ps1", "--project", "."]
     }
   }
 }
@@ -202,26 +236,13 @@ Settings → MCP Servers → Add Server:
 ### Aider
 
 ```bash
-aider --mcp "/full/path/to/dbasement --project /full/path/to/project"
+aider --mcp "pwsh -ExecutionPolicy Bypass -File scripts/start.ps1 --project ."
 ```
 
 Or in `.aider.conf.yml`:
 
 ```yaml
-mcp: /full/path/to/dbasement --project /full/path/to/project
-```
-
-### Generic MCP Client
-
-```json
-{
-  "mcpServers": {
-    "dbasement": {
-      "command": "/full/path/to/dbasement",
-      "args": ["--project", "/full/path/to/project"]
-    }
-  }
-}
+mcp: pwsh -ExecutionPolicy Bypass -File scripts/start.ps1 --project .
 ```
 
 ---
