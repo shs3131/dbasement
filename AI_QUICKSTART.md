@@ -1,51 +1,93 @@
 # AI Quickstart
 
-You (the AI) have access to Dbasement, an MCP server that stores structured
-project memory in `.dbasement/memory.db`. This memory persists across sessions.
+## Installation (do this first if Dbasement is not installed)
 
-## First encounter
+**RULE: Never install Go. Never build from source. Download the release binary.**
 
-1. The project has no `.dbasement/` directory.
-2. **Do this:**
-   - Read the project's key files (README, configs, source code).
-   - Call `initialize_project` with a summary and architecture.
-   - Call `update_memory` for each section you discover (features, api,
-     dependencies, etc.).
-   - Call `add_design_decision` for architectural choices you find.
-3. **Don't call** `get_*` tools yet — there's no data.
+### 1. Detect platform
 
-## Returning session
+```bash
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m)
+case "$ARCH" in x86_64|amd64) ARCH="amd64" ;; aarch64|arm64) ARCH="arm64" ;; esac
+```
 
-1. The `.dbasement/` directory exists.
-2. **Do this (minimum):**
-   - Call `get_project_summary` to re-establish context.
-3. **Do this if relevant:**
-   - Call `get_architecture` if you need structure details.
-   - Call `get_recent_changes` to see what happened since last session.
-   - Call `get_todo` to see pending tasks.
-   - Call other `get_*` tools only for the section your task needs.
+### 2. Download and extract
 
-## After making changes
+```bash
+# Linux / macOS
+URL="https://github.com/shs3131/dbasement/releases/latest/download"
+curl -sL "$URL/dbasement-$OS-$ARCH.tar.gz" | tar xz && chmod +x dbasement
 
-1. Call `refresh_project` to check git diff.
-2. If changes detected, read the actual code then call `update_memory`.
-3. If you made a design decision, call `add_design_decision`.
+# Windows (PowerShell)
+$url="https://github.com/shs3131/dbasement/releases/latest/download/dbasement-windows-amd64.zip"
+curl.exe -LO $url; Expand-Archive -Path dbasement-windows-amd64.zip -DestinationPath . -Force
+```
 
-## Confidence rules
+### 3. Configure MCP
+
+Determine client → read existing config → add dbasement entry → write back.
+
+```json
+{
+  "mcpServers": {
+    "dbasement": {
+      "command": "bash",
+      "args": ["scripts/start.sh", "."]
+    }
+  }
+}
+```
+
+On Windows:
+```json
+{
+  "mcpServers": {
+    "dbasement": {
+      "command": "pwsh",
+      "args": ["-ExecutionPolicy", "Bypass", "-File", "scripts/start.ps1", "--project", "."]
+    }
+  }
+}
+```
+
+### 4. Report
+
+"Dbasement installed. Start a new AI session to initialize project memory."
+
+---
+
+## Memory usage (after Dbasement is running)
+
+### First encounter
+
+1. Read project files (README, configs, source code)
+2. Call `initialize_project` with summary and architecture
+3. Call `update_memory` for each section discovered
+4. Call `add_design_decision` for architectural choices
+
+### Returning session
+
+1. Call `get_project_summary` (minimum context)
+2. Call `get_recent_changes` to see what's new
+3. Call `get_todo` for pending tasks
+4. Call other `get_*` tools only as needed
+
+### After code changes
+
+1. Call `refresh_project` to check git diff
+2. If changes detected, read code then `update_memory`
+
+### Confidence rules
 
 | Score | Behavior |
 |-------|----------|
 | >= 85 | Applied automatically (you read it in code) |
-| 70-84 | Applied, marked AI-inferred (you deduced it) |
-| < 70 | Ignored by server (don't bother) |
+| 70-84 | Applied, marked AI-inferred |
+| < 70 | Ignored by server |
 
-## Token-saving
+### Token-saving
 
-- `get_project_summary` is the minimum context. Everything else is optional.
-- One `search_memory` call is cheaper than calling 5 different `get_*` tools.
-- Don't call `get_todo` or `get_known_issues` unless your task needs them.
-- Cache tool results in your reasoning; don't re-fetch in the same session.
-
-## Reference
-
-See [AGENTS.md](AGENTS.md) for full workflows, diagrams, and examples.
+- `get_project_summary` is the minimum. Everything else optional.
+- One `search_memory` call is cheaper than 5 separate `get_*` calls.
+- Cache results in your reasoning; don't re-fetch in the same session.

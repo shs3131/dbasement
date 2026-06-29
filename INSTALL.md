@@ -1,1 +1,145 @@
-﻿# Installation Guide  Dbasement is a single native binary with zero runtime dependencies.  ## Prerequisites  - **Git** must be installed and available in your `PATH` (for git-based change detection). - No other runtime dependencies are required.  ## Option 1: Pre-built Binary (Recommended)  Download the latest binary for your platform from the [Releases](https://github.com/shs3131/dbasement/releases) page.  ### macOS (Apple Silicon / Intel)  ```bash # Download curl -LO https://github.com/shs3131/dbasement/releases/latest/download/dbasement-darwin-amd64.zip unzip dbasement-darwin-amd64.zip  # Make executable and move to PATH chmod +x dbasement sudo mv dbasement /usr/local/bin/  # Verify dbasement --help ```  ### Linux (amd64)  ```bash # Download curl -LO https://github.com/shs3131/dbasement/releases/latest/download/dbasement-linux-amd64.tar.gz tar xzf dbasement-linux-amd64.tar.gz  # Make executable and move to PATH chmod +x dbasement sudo mv dbasement /usr/local/bin/  # Verify dbasement --help ```  ### Windows (amd64)  ```powershell # Download and extract curl.exe -LO https://github.com/shs3131/dbasement/releases/latest/download/dbasement-windows-amd64.zip Expand-Archive -Path dbasement-windows-amd64.zip -DestinationPath .  # Move to a directory in your PATH Move-Item .\dbasement.exe C:\Windows\System32\  # Verify dbasement --help ```  ## Option 2: Build from Source  Requires Go 1.26 or later.  ### macOS  ```bash # Install Go via Homebrew brew install go  # Clone and build git clone https://github.com/shs3131/dbasement.git cd dbasement go build -o dbasement ./cmd/dbasement/  # Move to PATH sudo mv dbasement /usr/local/bin/ ```  ### Linux  ```bash # Install Go (adjust for your distro) sudo apt install golang-go  # or `sudo dnf install golang`  # Clone and build git clone https://github.com/shs3131/dbasement.git cd dbasement go build -o dbasement ./cmd/dbasement/  # Move to PATH sudo mv dbasement /usr/local/bin/ ```  ### Windows  ```powershell # Install Go via winget winget install GoLang.Go  # Clone and build git clone https://github.com/shs3131/dbasement.git cd dbasement go build -o dbasement.exe ./cmd/dbasement/  # Move to a directory in your PATH Move-Item .\dbasement.exe C:\Windows\System32\ ```  ## Option 3: Install via Go  If you have Go installed, you can install directly:  ```bash go install github.com/shs3131/dbasement/cmd/dbasement@latest ```  This places the binary in `$(go env GOPATH)/bin`, which should be in your `PATH`.  ## Option 4: Package Managers (Future)  - **Homebrew**: `brew install dbasement` (coming soon) - **Scoop**: `scoop install dbasement` (coming soon) - **APT**: `sudo apt install dbasement` (coming soon)  ## Verify Installation  ```bash dbasement --help ```  Expected output:  ``` Usage of dbasement:   -project string         Path to the project root (default: current directory) ```  ## Platform-Specific Notes  ### macOS  If you see "unidentified developer" warning:  ```bash xattr -d com.apple.quarantine /usr/local/bin/dbasement ```  ### Windows  If Windows Defender flags the binary, this is a false positive common with Go binaries. You can:  1. Add an exclusion for the binary in Windows Security. 2. Build from source instead.  ### Linux  On some distributions, you may need to install `git` if not already present:  ```bash sudo apt install git    # Debian/Ubuntu sudo dnf install git    # Fedora sudo pacman -S git      # Arch ```  ## Next Steps  Once installed, see [GET_STARTED.md](GET_STARTED.md) for usage instructions.
+﻿# Installation Guide
+
+**Prerequisite:** Git must be installed (for change detection). No other dependencies.
+
+---
+
+## Recommended: Pre-built Binary
+
+Download from [GitHub Releases](https://github.com/shs3131/dbasement/releases).
+
+### macOS (Apple Silicon)
+
+```bash
+curl -sL https://github.com/shs3131/dbasement/releases/latest/download/dbasement-darwin-arm64.tar.gz | tar xz
+sudo mv dbasement /usr/local/bin/
+```
+
+### macOS (Intel)
+
+```bash
+curl -sL https://github.com/shs3131/dbasement/releases/latest/download/dbasement-darwin-amd64.tar.gz | tar xz
+sudo mv dbasement /usr/local/bin/
+```
+
+### Linux (x86_64)
+
+```bash
+curl -sL https://github.com/shs3131/dbasement/releases/latest/download/dbasement-linux-amd64.tar.gz | tar xz
+sudo mv dbasement /usr/local/bin/
+```
+
+### Linux (ARM64)
+
+```bash
+curl -sL https://github.com/shs3131/dbasement/releases/latest/download/dbasement-linux-arm64.tar.gz | tar xz
+sudo mv dbasement /usr/local/bin/
+```
+
+### Windows (PowerShell)
+
+```powershell
+curl.exe -LO https://github.com/shs3131/dbasement/releases/latest/download/dbasement-windows-amd64.zip
+Expand-Archive -Path dbasement-windows-amd64.zip -DestinationPath . -Force
+Move-Item .\dbasement.exe C:\Windows\System32\
+```
+
+### Verify
+
+```bash
+dbasement --help
+```
+
+---
+
+## Alternative: Install with `go install` (requires Go 1.26+)
+
+```bash
+go install github.com/shs3131/dbasement/cmd/dbasement@latest
+```
+
+---
+
+## MCP Configuration
+
+After installing the binary, configure your AI client:
+
+### VS Code
+
+Project has `.vscode/mcp.json` — auto-discovered on open.
+
+### Claude Code
+
+```json
+// ~/.claude/settings.json or .claude/settings.json
+{
+  "mcpServers": {
+    "dbasement": {
+      "command": "dbasement",
+      "args": ["--project", "/path/to/your/project"]
+    }
+  }
+}
+```
+
+### Cursor
+
+Settings → MCP → Add Server:
+- Name: `dbasement`
+- Type: `command`
+- Command: `dbasement --project /path/to/your/project`
+
+### Cline / Roo Code
+
+```json
+// ~/.config/cline/mcp.json or ~/.config/roo/mcp.json
+{
+  "mcpServers": {
+    "dbasement": {
+      "command": "dbasement",
+      "args": ["--project", "/path/to/your/project"]
+    }
+  }
+}
+```
+
+### Codex CLI
+
+```json
+// .codex/mcp.json
+{
+  "mcpServers": {
+    "dbasement": {
+      "command": "dbasement",
+      "args": ["--project", "."]
+    }
+  }
+}
+```
+
+### Gemini CLI
+
+```json
+// ~/.config/gemini/mcp.json
+{
+  "mcpServers": {
+    "dbasement": {
+      "command": "dbasement",
+      "args": ["--project", "/path/to/your/project"]
+    }
+  }
+}
+```
+
+### Generic
+
+```json
+{
+  "mcpServers": {
+    "dbasement": {
+      "command": "dbasement",
+      "args": ["--project", "/path/to/your/project"]
+    }
+  }
+}
+```

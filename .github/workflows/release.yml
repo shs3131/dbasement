@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  goreleaser:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -46,40 +46,41 @@ jobs:
           go-version: "1.26"
           cache: true
 
-      - name: Debug workspace
-        run: |
-          pwd
-          ls -la
-          ls -la cmd/ 2>/dev/null || echo "NO cmd/ DIR"
-          ls -la cmd/dbasement/ 2>/dev/null || echo "NO cmd/dbasement/ DIR"
-
       - name: Build binary
         run: |
           mkdir -p dist
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
           go build -ldflags="-s -w" \
-            -o "dist/dbasement-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}" \
+            -o "dist/dbasement${{ matrix.ext }}" \
             ./cmd/dbasement/
 
       - name: Create archive (Unix)
         if: matrix.archive == 'tar.gz'
         run: |
           cd dist
-          tar czf "dbasement-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz" \
-            "dbasement-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
+          tar czf "dbasement-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz" "dbasement${{ matrix.ext }}"
+          rm "dbasement${{ matrix.ext }}"
 
       - name: Create archive (Windows)
         if: matrix.archive == 'zip'
-        run: 7z a "dist/dbasement-${{ matrix.goos }}-${{ matrix.goarch }}.zip" "dist/dbasement-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
+        run: |
+          cd dist
+          7z a "dbasement-windows-amd64.zip" "dbasement.exe"
+          rm "dbasement.exe"
 
-      - name: Upload artifact
+      - name: Generate checksums
+        run: |
+          cd dist
+          sha256sum *.tar.gz *.zip 2>/dev/null | tee checksums.txt
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dbasement-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: dist/dbasement-${{ matrix.goos }}-${{ matrix.goarch }}.${{ matrix.archive }}
+          name: release-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*
 
   create-release:
-    needs: goreleaser
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -89,9 +90,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+          merge-multiple: true
 
       - name: List artifacts
-        run: find artifacts -type f
+        run: ls -la artifacts/
 
       - name: Generate release notes
         id: notes
@@ -102,7 +104,7 @@ jobs:
             echo ''
             echo '| Platform | Architecture | Archive |'
             echo '|----------|-------------|---------|'
-            for f in artifacts/*/*.tar.gz artifacts/*/*.zip; do
+            for f in artifacts/*.tar.gz artifacts/*.zip; do
               name=$(basename "$f")
               case "$name" in
                 *linux-amd64*)    plat="Linux"     arch="x86_64" ;;
@@ -113,6 +115,12 @@ jobs:
               esac
               echo "| $plat | $arch | \`$name\` |"
             done
+            echo ''
+            echo '### SHA256 Checksums'
+            echo ''
+            echo '```'
+            cat artifacts/checksums.txt
+            echo '```'
             echo ''
             echo '---'
             echo ''
@@ -130,5 +138,6 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            artifacts/*/*.tar.gz
-            artifacts/*/*.zip
+            artifacts/*.tar.gz
+            artifacts/*.zip
+            artifacts/checksums.txt

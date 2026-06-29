@@ -1,27 +1,150 @@
 # AI Agent Guide for Dbasement
 
-This guide is for AI coding agents (Claude Code, Codex CLI, Cursor, Gemini CLI,
-Cline, Roo Code, Aider) that use Dbasement as an MCP server.
+**Read this first if you are an AI agent trying to install or use Dbasement.**
 
-## Overview
+---
 
-Dbasement stores structured project knowledge in a local SQLite database
-(`.dbasement/memory.db`). The AI reads and writes this memory using MCP tools.
-Knowledge persists across sessions — no need to re-scan the project.
+## Section 0: AI Installation Rules (MANDATORY)
+
+### Golden Rules
+
+1. **NEVER install Go.** NEVER run `go build`, `go install`, `go get`, or any Go command.
+2. **NEVER build from source** unless the user explicitly asks for it.
+3. **ALWAYS download from GitHub Releases** — the correct binary for the user's platform.
+4. **If the user asks why:** "Dbasement provides pre-built binaries. Building from source requires Go and is only needed for contributors."
+5. **If the user insists on building from source:** Say "Building from source requires Go 1.26+. Are you sure you want to install Go for this?" Then follow instructions in [DEVELOPMENT.md](DEVELOPMENT.md).
+
+### Installation Workflow
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                  AI Agent Session                    │
-│                                                     │
-│   Start ──► Retrieve context ──► Do work ──► Store  │
-│              (get_*)                   (update_*)   │
-│                                                     │
-│   Next session ──► Retrieve context (in 20ms) ──►   │
-│   No re-scanning needed                             │
-└─────────────────────────────────────────────────────┘
+1. Detect platform: Identify OS and architecture
+2. Download: Fetch the correct archive from GitHub Releases
+3. Extract: Extract the binary into the project root
+4. Configure MCP: Add dbasement to the client's MCP configuration
+5. Preserve: Keep existing MCP servers (merge, don't overwrite)
+6. Report: Tell the user Dbasement is installed and to start a new session
 ```
 
-## Workflows
+### Platform Detection
+
+```python
+# Python (use for generic MCP clients)
+import platform, sys
+system = platform.system().lower()  # "linux", "darwin", "windows"
+machine = platform.machine().lower()  # "x86_64", "arm64", "amd64"
+
+# Linux
+if system == "linux" and machine in ("x86_64", "amd64"):
+    asset = "dbasement-linux-amd64.tar.gz"
+elif system == "linux" and machine in ("aarch64", "arm64"):
+    asset = "dbasement-linux-arm64.tar.gz"
+# macOS
+elif system == "darwin" and machine in ("x86_64", "amd64"):
+    asset = "dbasement-darwin-amd64.tar.gz"
+elif system == "darwin" and machine in ("aarch64", "arm64"):
+    asset = "dbasement-darwin-arm64.tar.gz"
+# Windows
+elif system == "windows" and machine in ("x86_64", "amd64"):
+    asset = "dbasement-windows-amd64.zip"
+else:
+    raise Exception("Unsupported platform")
+```
+
+```bash
+# Bash (for shell commands)
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m)
+case "$ARCH" in x86_64|amd64) ARCH="amd64" ;; aarch64|arm64) ARCH="arm64" ;; esac
+case "$OS" in
+  linux)  ASSET="dbasement-linux-$ARCH.tar.gz" ;;
+  darwin) ASSET="dbasement-darwin-$ARCH.tar.gz" ;;
+  windows) ASSET="dbasement-windows-$ARCH.zip" ;;
+esac
+```
+
+```powershell
+# PowerShell (for Windows)
+$arch = if ([Environment]::Is64BitOperatingSystem) { "amd64" } else { "amd64" }
+$asset = "dbasement-windows-$arch.zip"
+```
+
+### Download URLs
+
+| Platform | Download URL (latest) |
+|----------|----------------------|
+| Linux (amd64) | `https://github.com/shs3131/dbasement/releases/latest/download/dbasement-linux-amd64.tar.gz` |
+| Linux (arm64) | `https://github.com/shs3131/dbasement/releases/latest/download/dbasement-linux-arm64.tar.gz` |
+| macOS (amd64) | `https://github.com/shs3131/dbasement/releases/latest/download/dbasement-darwin-amd64.tar.gz` |
+| macOS (arm64) | `https://github.com/shs3131/dbasement/releases/latest/download/dbasement-darwin-arm64.tar.gz` |
+| Windows (amd64) | `https://github.com/shs3131/dbasement/releases/latest/download/dbasement-windows-amd64.zip` |
+
+Version-specific: replace `latest` with tag like `v1.0.0`.
+
+### Extract Commands
+
+```bash
+# tar.gz (Linux/macOS)
+tar xzf dbasement-*.tar.gz && chmod +x dbasement
+
+# zip (Windows)
+Expand-Archive -Path dbasement-windows-amd64.zip -DestinationPath . -Force
+```
+
+### Detecting the AI Client
+
+Determine which AI client is running to configure it correctly:
+
+- **Claude Code**: Check `~/.claude/settings.json` or `CLAUDE_CODE` env var
+- **Cursor**: Look for `~/.cursor/mcp.json` or Cursor settings directory
+- **Cline**: Check `~/.config/cline/mcp.json`
+- **Roo Code**: Check `~/.config/roo/mcp.json`
+- **Codex CLI**: Look for `.codex/mcp.json` in project root
+- **Gemini CLI**: Check `~/.config/gemini/mcp.json`
+- **Aider**: Look for `.aider.conf.yml` or `~/.aider.conf.yml`
+- **VS Code**: Look for `.vscode/mcp.json` in project root
+- **Generic**: Look for `mcp.json` or `mcpServers` in config files
+
+### Configuring MCP
+
+**Add Dbasement to existing config, preserving other servers.**
+
+Read existing config → add dbasement entry → write back.
+
+Config entry (Unix):
+
+```json
+{
+  "mcpServers": {
+    "dbasement": {
+      "command": "bash",
+      "args": ["scripts/start.sh", "."]
+    }
+  }
+}
+```
+
+Config entry (Windows):
+
+```json
+{
+  "mcpServers": {
+    "dbasement": {
+      "command": "pwsh",
+      "args": ["-ExecutionPolicy", "Bypass", "-File", "scripts/start.ps1", "--project", "."]
+    }
+  }
+}
+```
+
+### Reporting Success
+
+Tell the user:
+
+> "Dbasement has been installed in your project. Start a new AI session and the agent will automatically initialize and remember your project context."
+
+---
+
+## Memory Workflows
 
 ### Workflow A: First-time Project Initialization
 
@@ -171,8 +294,6 @@ flowchart TD
 
 ### First-in-workflow tools
 
-These tools are designed to be called FIRST in their respective workflows:
-
 - `get_project_summary` — FIRST tool in every session start
 - `initialize_project` — FIRST (and only) tool in project setup
 - `refresh_project` — FIRST tool when checking for changes
@@ -211,8 +332,6 @@ Session 3 (new context, next week):
 
 ## Confidence Score Guide
 
-Use this table to determine confidence for `update_memory`:
-
 | Score | Meaning | When to use |
 |-------|---------|-------------|
 | 95-100 | Certain | Read it directly from the source code |
@@ -223,21 +342,11 @@ Use this table to determine confidence for `update_memory`:
 
 ## Best Practices for Token Minimization
 
-1. **Cache context in your thinking**: After calling `get_project_summary`, you
-   don't need to recall it unless the project changes.
-
-2. **One tool call per section**: Don't call `get_api` multiple times in a
-   session — the database doesn't change unless you update it.
-
-3. **Use `search_memory` as a fallback**: If you're not sure which section
-   contains the answer, one `search_memory` call is cheaper than 5 separate
-   `get_*` calls.
-
-4. **Skip known-empty sections**: Don't call `get_glossary` if you already
-   understand the domain. Don't call `get_known_issues` if there are no bugs.
-
-5. **Batch `update_memory` calls**: When initializing a project, call
-   `update_memory` for each section in sequence. Each call returns immediately.
+1. **Cache context in your thinking**: After calling `get_project_summary`, you don't need to recall it unless the project changes.
+2. **One tool call per section**: Don't call `get_api` multiple times in a session — the database doesn't change unless you update it.
+3. **Use `search_memory` as a fallback**: If you're not sure which section contains the answer, one `search_memory` call is cheaper than 5 separate `get_*` calls.
+4. **Skip known-empty sections**: Don't call `get_glossary` if you already understand the domain.
+5. **Batch `update_memory` calls**: When initializing a project, call `update_memory` for each section in sequence.
 
 ## Common Mistakes
 
@@ -249,4 +358,5 @@ Use this table to determine confidence for `update_memory`:
 | Not calling `refresh_project` | Stale memory | Always check after user edits |
 | Calling `update_memory` before reading changes | Guessing facts | Read the actual code first |
 | Using `search_memory` when you know the section | Inefficient | Use the specific get_* tool |
-| Calling `get_todo` multiple times per session | Wastes tokens | Cache it in your reasoning |
+| Installing Go to build Dbasement | Unnecessary | Download the pre-built binary from GitHub Releases |
+| Building from source automatically | Violates project policy | Always use releases unless user explicitly requests source |

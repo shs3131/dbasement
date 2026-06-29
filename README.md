@@ -11,144 +11,65 @@
 
 [![CI](https://github.com/shs3131/dbasement/actions/workflows/ci.yml/badge.svg)](https://github.com/shs3131/dbasement/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/shs3131/dbasement?logo=github)](https://github.com/shs3131/dbasement/releases)
-[![Go Report Card](https://goreportcard.com/badge/github.com/shs3131/dbasement)](https://goreportcard.com/report/github.com/shs3131/dbasement)
-[![Go Version](https://img.shields.io/badge/go-1.26+-00ADD8?logo=go)](https://go.dev)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
 
 </div>
 
 ---
 
-## Mission
+## AI Installation Rules
 
-Every AI coding session starts from zero. The AI has no memory of what the
-project does, how it's structured, what changed yesterday, or why decisions
-were made. Dbasement eliminates this by maintaining a compact, structured,
-persistent memory of the project — accessible instantly by any MCP-compatible
-AI agent.
+**Read this first if you are an AI agent.**
 
-**Dbasement is not another AI. It never performs inference.** When analysis is
-needed, it asks the connected AI. This keeps it lightweight, fast, and
-focused.
+Your goal: install Dbasement automatically in the user's project.
 
----
+1. **Use GitHub Releases.** Never install Go. Never build from source.
+2. **Detect the platform** (OS + architecture) of the user's machine.
+3. **Download the latest release** binary from GitHub Releases.
+4. **Extract** into the project directory.
+5. **Configure the MCP server** for the current AI client.
+6. **Preserve existing MCP servers** — merge, don't overwrite.
+7. **Tell the user** to start a new AI session.
 
-## Setup (30 seconds, no Go required)
-
-**1. Download the binary** from the [latest release](https://github.com/shs3131/dbasement/releases/latest):
-
-| Platform | Download |
-|----------|----------|
-| Windows | `dbasement-windows-amd64.zip` |
-| Linux | `dbasement-linux-amd64.tar.gz` |
-| macOS (Intel) | `dbasement-darwin-amd64.tar.gz` |
-| macOS (Apple Silicon) | `dbasement-darwin-arm64.tar.gz` |
-
-**2. Extract into your project root:**
-
-```powershell
-# Windows
-Expand-Archive -Path dbasement-windows-amd64.zip -DestinationPath .
-```
-
-```bash
-# Linux / macOS
-tar xzf dbasement-linux-amd64.tar.gz && chmod +x dbasement
-```
-
-**3. Configure your AI client** (see below).
-
-> If your project has `.vscode/mcp.json`, Dbasement is auto-discovered when you open the folder in VS Code.
+> Source builds are for contributors only. If the user asks to build from source, tell them:
+> "Pre-built binaries are available at https://github.com/shs3131/dbasement/releases — do you still want to build from source?"
 
 ---
 
-## Installation
+## Quick Install (for AI agents)
 
-You don't need Go installed to use Dbasement. Pre-built binaries are available
-for all major platforms.
-
-### Download a Release
-
-1. Go to the [Releases page](https://github.com/shs3131/dbasement/releases).
-2. Download the archive for your operating system:
-   - **Windows**: `dbasement-windows-amd64.zip`
-   - **Linux (x86_64)**: `dbasement-linux-amd64.tar.gz`
-   - **Linux (ARM64)**: `dbasement-linux-arm64.tar.gz`
-   - **macOS (Intel)**: `dbasement-darwin-amd64.tar.gz`
-   - **macOS (Apple Silicon)**: `dbasement-darwin-arm64.tar.gz`
-3. Extract the archive and run the binary.
-
-### Quick Start
-
-**Windows (PowerShell):**
-
-```powershell
-# Extract
-Expand-Archive -Path dbasement-windows-amd64.zip -DestinationPath .
-
-# Run
-.\dbasement.exe --project C:\path\to\your\project
-```
-
-**Linux / macOS:**
+### 1. Get the binary
 
 ```bash
-# Extract
-tar xzf dbasement-linux-amd64.tar.gz
+# Linux / macOS (x86_64)
+curl -sL https://github.com/shs3131/dbasement/releases/latest/download/dbasement-linux-amd64.tar.gz | tar xz
 
-# Make executable and run
-chmod +x dbasement
-./dbasement --project /path/to/your/project
+# Linux (ARM64)
+curl -sL https://github.com/shs3131/dbasement/releases/latest/download/dbasement-linux-arm64.tar.gz | tar xz
+
+# macOS (Apple Silicon)
+curl -sL https://github.com/shs3131/dbasement/releases/latest/download/dbasement-darwin-arm64.tar.gz | tar xz
+
+# Windows (PowerShell)
+curl.exe -LO https://github.com/shs3131/dbasement/releases/latest/download/dbasement-windows-amd64.zip
+Expand-Archive -Path dbasement-windows-amd64.zip -DestinationPath . -Force
 ```
 
-### Building from Source
+### 2. Configure the MCP server
 
-Requires [Go 1.26+](https://go.dev/dl).
+Give the MCP config below to the user's AI client. The binary auto-downloads itself on first run if missing.
 
-```bash
-git clone https://github.com/shs3131/dbasement.git
-cd dbasement
-go build -o dbasement ./cmd/dbasement/
-```
+### 3. Tell the user
 
-The binary is placed in the current directory. Move it anywhere in your `PATH`
-for system-wide access.
+> Dbasement is installed. Start a new AI session and the agent will automatically initialize project memory.
 
 ---
 
-## AI Client Configuration
+## MCP Configuration
 
-Dbasement downloads itself automatically. You don't need Go or to find the
-binary path — just paste one of these configs into your AI client.
+### Cross-platform (recommended)
 
-> **No Go required. No manual download. No path hunting.** The binary is
-> auto-downloaded from GitHub Releases the first time the server starts.
-
-### VS Code
-
-Open the project folder. `.vscode/mcp.json` is already included — Dbasement
-appears automatically in VS Code's MCP list.
-
-### Copy-paste config (works for any client)
-
-Give this to any MCP-compatible AI:
-
-```json
-{
-  "mcpServers": {
-    "dbasement": {
-      "command": "pwsh",
-      "args": ["-ExecutionPolicy", "Bypass", "-File", "scripts/start.ps1", "--project", "."]
-    }
-  }
-}
-```
-
-The AI downloads `dbasement.exe`, starts the memory server. Next session, the
-binary is already there.
-
-### Linux / macOS (cross-platform)
+Paste this into your AI client's MCP configuration:
 
 ```json
 {
@@ -161,13 +82,7 @@ binary is already there.
 }
 ```
 
-### Claude Code
-
-```bash
-claude --mcp "pwsh -ExecutionPolicy Bypass -File scripts/start.ps1 --project ."
-```
-
-Or in `~/.claude/settings.json`:
+On Windows, use:
 
 ```json
 {
@@ -180,17 +95,59 @@ Or in `~/.claude/settings.json`:
 }
 ```
 
+> The `start.sh` / `start.ps1` scripts auto-download the binary from GitHub Releases if it's missing. No Go, no manual download.
+
+### VS Code (auto-discovered)
+
+If the project has `.vscode/mcp.json`, Dbasement appears automatically when you open the folder in VS Code.
+
+### Claude Code
+
+In `~/.claude/settings.json` or project `.claude/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "dbasement": {
+      "command": "bash",
+      "args": ["scripts/start.sh", "."]
+    }
+  }
+}
+```
+
+Or run:
+
+```bash
+claude --mcp "bash scripts/start.sh ."
+```
+
 ### Cursor
 
-Settings → MCP Servers → Add Server:
+Settings → MCP → Add Server:
 
 - **Name**: `dbasement`
 - **Type**: `command`
-- **Command**: `pwsh -ExecutionPolicy Bypass -File scripts/start.ps1 --project .`
+- **Command**: `bash scripts/start.sh .`
+
+### Cline / Roo Code
+
+In `~/.config/cline/mcp.json` or `~/.config/roo/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "dbasement": {
+      "command": "bash",
+      "args": ["scripts/start.sh", "."]
+    }
+  }
+}
+```
 
 ### Codex CLI
 
-`.codex/mcp.json`:
+In `.codex/mcp.json`:
 
 ```json
 {
@@ -205,29 +162,14 @@ Settings → MCP Servers → Add Server:
 
 ### Gemini CLI
 
-`~/.config/gemini/mcp.json`:
+In `~/.config/gemini/mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "dbasement": {
-      "command": "pwsh",
-      "args": ["-ExecutionPolicy", "Bypass", "-File", "scripts/start.ps1", "--project", "."]
-    }
-  }
-}
-```
-
-### Cline / Roo Code
-
-`~/.config/cline/mcp.json` or `~/.config/roo/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "dbasement": {
-      "command": "pwsh",
-      "args": ["-ExecutionPolicy", "Bypass", "-File", "scripts/start.ps1", "--project", "."]
+      "command": "bash",
+      "args": ["scripts/start.sh", "."]
     }
   }
 }
@@ -236,14 +178,18 @@ Settings → MCP Servers → Add Server:
 ### Aider
 
 ```bash
-aider --mcp "pwsh -ExecutionPolicy Bypass -File scripts/start.ps1 --project ."
+aider --mcp "bash scripts/start.sh ."
 ```
 
 Or in `.aider.conf.yml`:
 
 ```yaml
-mcp: pwsh -ExecutionPolicy Bypass -File scripts/start.ps1 --project .
+mcp: bash scripts/start.sh .
 ```
+
+### All MCP configs in one file
+
+See [MCP_CONFIGS.md](MCP_CONFIGS.md) for every supported client in a single copy-paste location.
 
 ---
 
@@ -284,30 +230,6 @@ After a change: AI updates only the affected section (<2s)
     ├── changelog        # Meaningful project updates
     └── glossary         # Project terminology
 ```
-
----
-
-## Features
-
-- **Persistent memory** — Project knowledge survives between AI sessions
-- **Structured knowledge** — Summary, architecture, API, database,
-  dependencies, design decisions, glossary, known issues, TODOs, changelog
-- **Incremental updates** — Never regenerate the entire memory; update only
-  what changed
-- **Smart retrieval** — AI retrieves only the section it needs, not the whole
-  database
-- **Git-aware** — Detects changes via `git diff`; no full rescans
-- **File watching** — Optional poll-based watcher for non-git changes
-- **Confidence system** — 0-100% confidence scoring; low-confidence updates
-  marked or ignored
-- **Small change filtering** — Ignores formatting, comments, whitespace,
-  typo fixes
-- **Multi-agent** — Works with Claude Code, Cursor, Codex CLI, Gemini CLI,
-  Cline, Roo Code, Aider, and any MCP client
-- **Zero infrastructure** — SQLite database, no vector DB, no Elasticsearch,
-  no Redis, no cloud
-- **Single binary** — ~11 MB, no runtime dependencies
-- **Cross-platform** — Windows, macOS, Linux
 
 ---
 
@@ -352,9 +274,9 @@ After a change: AI updates only the affected section (<2s)
 
 ## AI Agent Workflow
 
-This section is for AI agents that use Dbasement. For detailed workflows,
-diagrams, and examples, see [AGENTS.md](AGENTS.md) and
-[AI_QUICKSTART.md](AI_QUICKSTART.md).
+For detailed workflows, rules, and examples, see:
+- [AGENTS.md](AGENTS.md) — Full AI agent guide with installation rules, workflows, and tool reference
+- [AI_QUICKSTART.md](AI_QUICKSTART.md) — One-page machine-readable quickstart
 
 ### First Session
 
@@ -383,185 +305,76 @@ diagrams, and examples, see [AGENTS.md](AGENTS.md) and
 4. Call add_design_decision if warranted
 ```
 
-### Token-Saving Rules
+---
 
-- Start with `get_project_summary`. Everything else is optional.
-- Don't call all `get_*` tools — only the ones your task needs.
-- One `search_memory` call is cheaper than 5 separate `get_*` calls.
-- Cache results in your reasoning; don't re-fetch in the same session.
+## Release Assets
+
+Pre-built binaries for every release:
+
+| Platform | Architecture | Archive |
+|----------|-------------|---------|
+| Linux | x86_64 | `dbasement-linux-amd64.tar.gz` |
+| Linux | ARM64 | `dbasement-linux-arm64.tar.gz` |
+| macOS | Intel | `dbasement-darwin-amd64.tar.gz` |
+| macOS | Apple Silicon | `dbasement-darwin-arm64.tar.gz` |
+| Windows | x86_64 | `dbasement-windows-amd64.zip` |
+
+Each archive contains a single binary named `dbasement` (or `dbasement.exe` on Windows).
 
 ---
 
-## Complete End-to-End Walkthrough
+## Features
 
-### Step 1: Install Dbasement
+- **Persistent memory** — Project knowledge survives between AI sessions
+- **Structured knowledge** — Summary, architecture, API, database, dependencies, design decisions, glossary, known issues, TODOs, changelog
+- **Incremental updates** — Never regenerate the entire memory; update only what changed
+- **Smart retrieval** — AI retrieves only the section it needs, not the whole database
+- **Git-aware** — Detects changes via `git diff`; no full rescans
+- **File watching** — Optional poll-based watcher for non-git changes
+- **Confidence system** — 0-100% confidence scoring; low-confidence updates marked or ignored
+- **Small change filtering** — Ignores formatting, comments, whitespace, typo fixes
+- **Multi-agent** — Works with Claude Code, Cursor, Codex CLI, Gemini CLI, Cline, Roo Code, Aider, and any MCP client
+- **Zero infrastructure** — SQLite database, no vector DB, no Elasticsearch, no Redis, no cloud
+- **Single binary** — ~11 MB, no runtime dependencies
+- **Cross-platform** — Windows, macOS, Linux
 
-**Option A — Download a release binary (recommended, no Go needed):**
+---
 
-Download the latest binary from the
-[Releases page](https://github.com/shs3131/dbasement/releases) and extract it.
+## FAQ
 
-**Option B — Build from source:**
+### Does Dbasement send my code anywhere?
 
-```bash
-git clone https://github.com/shs3131/dbasement.git
-cd dbasement
-go build -o dbasement ./cmd/dbasement/
-```
+No. Dbasement runs entirely locally. It never makes network requests, sends telemetry, or communicates with anything other than your AI agent via stdio.
 
-### Step 2: Configure AI Client
+### Does Dbasement modify my code?
 
-Add Dbasement to your AI client's MCP config (see
-[AI Client Configuration](#ai-client-configuration)).
+No. Dbasement is read-only with respect to your project files. It only writes to `.dbasement/memory.db`. It never touches your source code.
 
-### Step 3: First AI Session
+### Can I use Dbasement without Git?
 
-The AI reads a project file and discovers Dbasement. It automatically
-initializes the memory database and performs the first project analysis.
+Yes. The file watcher detects changes via SHA-256 hash comparison. Git integration is preferred but optional.
 
-```
-User: Read GET_STARTED.md
+### How big does the database get?
 
-AI: (sees Dbasement is configured, initializes memory)
-    Tool: initialize_project
-      project_path: .
-      summary: "This project is a web application..."
-      architecture: "React frontend, Go backend, PostgreSQL database"
+The `.dbasement/memory.db` file typically stays under 1 MB for most projects. Each memory section is a few hundred bytes to a few kilobytes.
 
-    Tool: update_memory
-      section: features
-      content: "User authentication, file upload..."
-      confidence: 90
+### Can multiple AI agents use Dbasement simultaneously?
 
-    Tool: update_memory
-      section: api
-      content: "POST /api/login, GET /api/files..."
-      confidence: 90
+Yes. Dbasement supports multiple connections. SQLite handles read concurrency natively with WAL mode. Write operations are serialized.
 
-    Tool: add_design_decision
-      decision: "Using PostgreSQL for data persistence"
-      reason: "Required for complex query support"
+### Will Dbasement slow down my AI?
 
-    Project memory initialized. I understand the project.
-```
+No. Memory retrieval takes <20ms. Memory updates take <2s. The AI spends less time understanding the project, not more.
 
-### Step 4: Memory is Stored
+### How do I update the memory?
 
-Dbasement writes to `.dbasement/memory.db`. This is a single SQLite file.
+The AI updates memory automatically via `update_memory`. You can also manually trigger a refresh with `refresh_project`.
 
-### Step 5: Second AI Session (Brand New Context)
-
-The AI connects to Dbasement and retrieves knowledge instantly.
-
-```
-AI: Hello! I see Dbasement is set up. Let me retrieve the project context.
-
-    Tool: get_project_summary
-    -> "This project is a web application..."
-
-    Tool: get_architecture
-    -> "React frontend, Go backend, PostgreSQL database"
-
-    Tool: get_recent_changes
-    -> "No recent changes recorded."
-
-    I'm ready. This is a web application with React frontend,
-    Go backend, and PostgreSQL. What would you like to work on?
-```
-
-No file scanning. No token waste. The AI understands the project in <20ms.
-
-### Step 6: User Modifies Code
-
-```bash
-# User adds a new API endpoint
-echo 'func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
-  // new endpoint
-}' >> api/handlers.go
-```
-
-### Step 7: AI Detects and Updates Memory
-
-```
-User: What changed?
-
-AI: Let me check.
-
-    Tool: refresh_project
-    -> "Changes detected (confidence: 85%): Added new API endpoint"
-
-    Tool: update_memory
-      section: api
-      content: "...GET /api/users: Get user by ID..."
-      confidence: 85
-      changelog: "Added GET /api/users endpoint"
-```
-
-### Step 8: Third AI Session
-
-```
-AI: I remember this project.
-
-    Tool: get_recent_changes
-    -> "[2026-06-29 14:30] Added GET /api/users endpoint"
-
-    The project recently added a user endpoint. The stack is
-    React + Go + PostgreSQL. What would you like to do?
-```
-
-The AI is aware of the update without rescanning anything.
-
-### How to Remove Dbasement
+### How do I remove Dbasement?
 
 ```bash
 rm -rf .dbasement/
 ```
-
-This completely removes all stored memory. The project is unaffected.
-
----
-
-## Architecture
-
-```
-┌──────────────────────────────────────────────────┐
-│                   AI Agent                        │
-│   (Claude Code, Cursor, Codex CLI, Gemini, etc.) │
-└──────────────┬───────────────────────────────────┘
-               │  JSON-RPC 2.0 over stdio
-               ▼
-┌──────────────────────────────────────────────────┐
-│              Dbasement MCP Server                 │
-│                                                   │
-│  ┌─────────┐  ┌──────────┐  ┌──────────────────┐ │
-│  │  git    │  │ watcher  │  │    analyzer       │ │
-│  │ client  │  │ (poll)   │  │ (relevance/conf)  │ │
-│  └────┬────┘  └────┬─────┘  └────────┬─────────┘ │
-│       │            │                  │           │
-│       ▼            ▼                  ▼           │
-│  ┌─────────────────────────────────────────────┐  │
-│  │              memory.Manager                  │  │
-│  └───────────────────┬─────────────────────────┘  │
-│                      │                            │
-│                      ▼                            │
-│  ┌─────────────────────────────────────────────┐  │
-│  │           storage.DB (SQLite)                │  │
-│  │           .dbasement/memory.db               │  │
-│  └─────────────────────────────────────────────┘  │
-└──────────────────────────────────────────────────┘
-```
-
----
-
-## Performance
-
-| Operation | Target |
-|-----------|--------|
-| Initialization | <30 seconds |
-| Memory retrieval | <20 milliseconds |
-| Memory update | <2 seconds |
-| Idle RAM | ~10-15 MB |
-| Idle CPU | ~0% |
 
 ---
 
@@ -569,67 +382,17 @@ This completely removes all stored memory. The project is unaffected.
 
 | File | Purpose |
 |------|---------|
-| [AGENTS.md](AGENTS.md) | Workflow diagrams, session examples, tool usage guide for AI agents |
-| [AI_QUICKSTART.md](AI_QUICKSTART.md) | One-page quickstart for LLMs — what to call and when |
-| [GET_STARTED.md](GET_STARTED.md) | Human-friendly getting started guide |
+| [AGENTS.md](AGENTS.md) | AI agent guide: installation rules, workflows, tool reference |
+| [AI_QUICKSTART.md](AI_QUICKSTART.md) | One-page machine-readable quickstart for LLMs |
+| [MCP_CONFIGS.md](MCP_CONFIGS.md) | MCP configuration for every supported AI client |
 | [INSTALL.md](INSTALL.md) | Platform-specific installation instructions |
-| [DEVELOPMENT.md](DEVELOPMENT.md) | Building from source, testing, contributing |
-| [ROADMAP.md](ROADMAP.md) | Planned features and project direction |
-
-## FAQ
-
-### Does Dbasement send my code anywhere?
-
-No. Dbasement runs entirely locally. It never makes network requests, sends
-telemetry, or communicates with anything other than your AI agent via stdio.
-
-### Does Dbasement modify my code?
-
-No. Dbasement is read-only with respect to your project files. It only writes
-to `.dbasement/memory.db`. It never touches your source code.
-
-### Can I use Dbasement without Git?
-
-Yes. The file watcher detects changes via SHA-256 hash comparison. Git
-integration is preferred but optional.
-
-### How big does the database get?
-
-The `.dbasement/memory.db` file typically stays under 1 MB for most projects.
-Each memory section is a few hundred bytes to a few kilobytes.
-
-### Can multiple AI agents use Dbasement simultaneously?
-
-Yes. Dbasement supports multiple connections. SQLite handles read concurrency
-natively with WAL mode. Write operations are serialized.
-
-### Will Dbasement slow down my AI?
-
-No. Memory retrieval takes <20ms. Memory updates take <2s. The AI spends less
-time understanding the project, not more.
-
-### How do I update the memory?
-
-The AI updates memory automatically via `update_memory`. You can also manually
-trigger a refresh with `refresh_project`.
-
-### Is the memory shared between developers?
-
-By default, each developer has their own `.dbasement/` directory. You can share
-memory by committing the database (not recommended) or using the export feature
-(future).
-
----
+| [GET_STARTED.md](GET_STARTED.md) | Human-friendly getting started guide |
+| [DEVELOPMENT.md](DEVELOPMENT.md) | Building from source (contributors only) |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Contributing guidelines |
 
 ## Project Status
 
-Dbasement is in **active development**. The core functionality is stable and
-usable. See [ROADMAP.md](ROADMAP.md) for planned features.
-
-## Contributing
-
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for
-guidelines.
+Dbasement is in **active development**. The core functionality is stable and usable.
 
 ## License
 

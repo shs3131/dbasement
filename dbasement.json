@@ -1,0 +1,96 @@
+{
+  "name": "dbasement",
+  "description": "Persistent project memory for AI coding agents",
+  "repo": "github.com/shs3131/dbasement",
+  "version": "1.1.0",
+  "distribution": {
+    "primary": "github_releases",
+    "secondary": "go_install",
+    "source_build": "contributors_only",
+    "url": "https://github.com/shs3131/dbasement/releases"
+  },
+  "ai_installation": {
+    "rules": [
+      "Never install Go",
+      "Never build from source",
+      "Always download from GitHub Releases",
+      "Detect platform and download correct binary",
+      "Configure MCP server for the current AI client",
+      "Preserve existing MCP servers when merging configs"
+    ],
+    "workflow": [
+      "Detect platform (OS + architecture)",
+      "Download latest release binary",
+      "Extract into project directory",
+      "Configure MCP server in client config",
+      "Tell user to start a new session"
+    ]
+  },
+  "platforms": {
+    "linux_amd64": {
+      "asset": "dbasement-linux-amd64.tar.gz",
+      "extract": "tar xzf"
+    },
+    "linux_arm64": {
+      "asset": "dbasement-linux-arm64.tar.gz",
+      "extract": "tar xzf"
+    },
+    "darwin_amd64": {
+      "asset": "dbasement-darwin-amd64.tar.gz",
+      "extract": "tar xzf"
+    },
+    "darwin_arm64": {
+      "asset": "dbasement-darwin-arm64.tar.gz",
+      "extract": "tar xzf"
+    },
+    "windows_amd64": {
+      "asset": "dbasement-windows-amd64.zip",
+      "extract": "Expand-Archive"
+    }
+  },
+  "mcp": {
+    "server_name": "dbasement",
+    "protocol": "stdio",
+    "transport": "JSON-RPC 2.0",
+    "config_unix": {
+      "command": "bash",
+      "args": ["scripts/start.sh", "."]
+    },
+    "config_windows": {
+      "command": "pwsh",
+      "args": ["-ExecutionPolicy", "Bypass", "-File", "scripts/start.ps1", "--project", "."]
+    },
+    "tools": [
+      "get_project_summary",
+      "get_architecture",
+      "get_features",
+      "get_api",
+      "get_database",
+      "get_dependencies",
+      "get_recent_changes",
+      "get_known_issues",
+      "get_todo",
+      "get_design_decisions",
+      "get_glossary",
+      "search_memory",
+      "initialize_project",
+      "update_memory",
+      "add_design_decision",
+      "add_todo",
+      "add_known_issue",
+      "refresh_project",
+      "resolve_known_issue",
+      "mark_todo_done"
+    ]
+  },
+  "ai_clients": {
+    "claude_code": { "config_paths": ["~/.claude/settings.json", ".claude/settings.json"] },
+    "cursor": { "config_type": "settings_ui" },
+    "cline": { "config_paths": ["~/.config/cline/mcp.json"] },
+    "roo_code": { "config_paths": ["~/.config/roo/mcp.json"] },
+    "codex_cli": { "config_paths": [".codex/mcp.json"] },
+    "gemini_cli": { "config_paths": ["~/.config/gemini/mcp.json"] },
+    "aider": { "config_type": "cli_flag", "flag": "--mcp" },
+    "vscode": { "config_paths": [".vscode/mcp.json"] }
+  }
+}
