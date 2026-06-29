@@ -1,6 +1,6 @@
 # Binaries
-dbasement
-dbasement.exe
+/dbasement
+/dbasement.exe
 *.exe
 *.dll
 *.so
