@@ -4,7 +4,7 @@
 
 ---
 
-## Recommended: Pre-built Binary
+## Pre-built Binary (Recommended)
 
 Download from [GitHub Releases](https://github.com/shs3131/dbasement/releases).
 
@@ -52,7 +52,7 @@ dbasement --help
 
 ---
 
-## Alternative: Install with `go install` (requires Go 1.26+)
+## Alternative (requires Go 1.26+)
 
 ```bash
 go install github.com/shs3131/dbasement/cmd/dbasement@latest
@@ -60,86 +60,8 @@ go install github.com/shs3131/dbasement/cmd/dbasement@latest
 
 ---
 
-## MCP Configuration
+## AI Configuration
 
-After installing the binary, configure your AI client:
+After installing, see [MCP_CONFIGS.md](MCP_CONFIGS.md) to configure your AI client.
 
-### VS Code
-
-Project has `.vscode/mcp.json` — auto-discovered on open.
-
-### Claude Code
-
-```json
-// ~/.claude/settings.json or .claude/settings.json
-{
-  "mcpServers": {
-    "dbasement": {
-      "command": "dbasement",
-      "args": ["--project", "/path/to/your/project"]
-    }
-  }
-}
-```
-
-### Cursor
-
-Settings → MCP → Add Server:
-- Name: `dbasement`
-- Type: `command`
-- Command: `dbasement --project /path/to/your/project`
-
-### Cline / Roo Code
-
-```json
-// ~/.config/cline/mcp.json or ~/.config/roo/mcp.json
-{
-  "mcpServers": {
-    "dbasement": {
-      "command": "dbasement",
-      "args": ["--project", "/path/to/your/project"]
-    }
-  }
-}
-```
-
-### Codex CLI
-
-```json
-// .codex/mcp.json
-{
-  "mcpServers": {
-    "dbasement": {
-      "command": "dbasement",
-      "args": ["--project", "."]
-    }
-  }
-}
-```
-
-### Gemini CLI
-
-```json
-// ~/.config/gemini/mcp.json
-{
-  "mcpServers": {
-    "dbasement": {
-      "command": "dbasement",
-      "args": ["--project", "/path/to/your/project"]
-    }
-  }
-}
-```
-
-### Generic
-
-```json
-{
-  "mcpServers": {
-    "dbasement": {
-      "command": "dbasement",
-      "args": ["--project", "/path/to/your/project"]
-    }
-  }
-}
-```
+If you are an AI agent installing Dbasement automatically, read [AI_QUICKSTART.md](AI_QUICKSTART.md) first.

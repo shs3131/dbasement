@@ -17,179 +17,66 @@
 
 ---
 
-## AI Installation Rules
-
-**Read this first if you are an AI agent.**
-
-Your goal: install Dbasement automatically in the user's project.
-
-1. **Use GitHub Releases.** Never install Go. Never build from source.
-2. **Detect the platform** (OS + architecture) of the user's machine.
-3. **Download the latest release** binary from GitHub Releases.
-4. **Extract** into the project directory.
-5. **Configure the MCP server** for the current AI client.
-6. **Preserve existing MCP servers** — merge, don't overwrite.
-7. **Tell the user** to start a new AI session.
-
-> Source builds are for contributors only. If the user asks to build from source, tell them:
-> "Pre-built binaries are available at https://github.com/shs3131/dbasement/releases — do you still want to build from source?"
+> **Are you an AI agent?**
+>
+> Read `AI_QUICKSTART.md` first. If more detail is needed, continue with `AGENTS.md`.
 
 ---
 
-## Quick Install (for AI agents)
+## What is Dbasement?
 
-### 1. Get the binary
+Every AI coding session starts from zero. The AI has no memory of what the project does, how it's structured, what changed yesterday, or why decisions were made. Dbasement eliminates this by maintaining a compact, structured, persistent memory of the project — accessible instantly by any MCP-compatible AI agent.
+
+**Dbasement is not an AI. It never performs inference.** When analysis is needed, it asks the connected AI. This keeps it lightweight, fast, and focused.
+
+## Features
+
+- **Persistent memory** — Project knowledge survives between AI sessions
+- **Structured knowledge** — Summary, architecture, API, database, dependencies, design decisions, glossary, known issues, TODOs, changelog
+- **Incremental updates** — Never regenerate the entire memory; update only what changed
+- **Git-aware** — Detects changes via `git diff`; no full rescans
+- **File watching** — Optional poll-based watcher for non-git changes
+- **Confidence system** — 0-100% scoring; low-confidence updates flagged or ignored
+- **Small change filtering** — Ignores formatting, comments, whitespace, typo fixes
+- **Multi-agent** — Works with Claude Code, Cursor, Codex CLI, Gemini CLI, Cline, Roo Code, Aider, and any MCP client
+- **Zero infrastructure** — SQLite database, no vector DB, no Elasticsearch, no Redis, no cloud
+- **Single binary** — ~11 MB, no runtime dependencies
+- **Cross-platform** — Windows, macOS, Linux
+
+---
+
+## Quick Start
+
+### 1. Install
+
+Download the binary from the [latest release](https://github.com/shs3131/dbasement/releases/latest) and extract it into your project root:
 
 ```bash
-# Linux / macOS (x86_64)
+# Linux / macOS
 curl -sL https://github.com/shs3131/dbasement/releases/latest/download/dbasement-linux-amd64.tar.gz | tar xz
-
-# Linux (ARM64)
-curl -sL https://github.com/shs3131/dbasement/releases/latest/download/dbasement-linux-arm64.tar.gz | tar xz
-
-# macOS (Apple Silicon)
-curl -sL https://github.com/shs3131/dbasement/releases/latest/download/dbasement-darwin-arm64.tar.gz | tar xz
 
 # Windows (PowerShell)
 curl.exe -LO https://github.com/shs3131/dbasement/releases/latest/download/dbasement-windows-amd64.zip
 Expand-Archive -Path dbasement-windows-amd64.zip -DestinationPath . -Force
 ```
 
-### 2. Configure the MCP server
-
-Give the MCP config below to the user's AI client. The binary auto-downloads itself on first run if missing.
-
-### 3. Tell the user
-
-> Dbasement is installed. Start a new AI session and the agent will automatically initialize project memory.
-
----
-
-## MCP Configuration
-
-### Cross-platform (recommended)
-
-Paste this into your AI client's MCP configuration:
-
-```json
-{
-  "mcpServers": {
-    "dbasement": {
-      "command": "bash",
-      "args": ["scripts/start.sh", "."]
-    }
-  }
-}
-```
-
-On Windows, use:
-
-```json
-{
-  "mcpServers": {
-    "dbasement": {
-      "command": "pwsh",
-      "args": ["-ExecutionPolicy", "Bypass", "-File", "scripts/start.ps1", "--project", "."]
-    }
-  }
-}
-```
-
-> The `start.sh` / `start.ps1` scripts auto-download the binary from GitHub Releases if it's missing. No Go, no manual download.
-
-### VS Code (auto-discovered)
-
-If the project has `.vscode/mcp.json`, Dbasement appears automatically when you open the folder in VS Code.
-
-### Claude Code
-
-In `~/.claude/settings.json` or project `.claude/settings.json`:
-
-```json
-{
-  "mcpServers": {
-    "dbasement": {
-      "command": "bash",
-      "args": ["scripts/start.sh", "."]
-    }
-  }
-}
-```
-
-Or run:
+Or use the auto-download scripts (binary downloads itself on first run):
 
 ```bash
-claude --mcp "bash scripts/start.sh ."
+# Linux / macOS
+bash scripts/start.sh .
+
+# Windows
+pwsh -ExecutionPolicy Bypass -File scripts/start.ps1 --project .
 ```
 
-### Cursor
+### 2. Configure your AI client
 
-Settings → MCP → Add Server:
+See [MCP_CONFIGS.md](MCP_CONFIGS.md) for configuration instructions for every supported AI client.
 
-- **Name**: `dbasement`
-- **Type**: `command`
-- **Command**: `bash scripts/start.sh .`
+### 3. Start a new AI session
 
-### Cline / Roo Code
-
-In `~/.config/cline/mcp.json` or `~/.config/roo/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "dbasement": {
-      "command": "bash",
-      "args": ["scripts/start.sh", "."]
-    }
-  }
-}
-```
-
-### Codex CLI
-
-In `.codex/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "dbasement": {
-      "command": "bash",
-      "args": ["scripts/start.sh", "."]
-    }
-  }
-}
-```
-
-### Gemini CLI
-
-In `~/.config/gemini/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "dbasement": {
-      "command": "bash",
-      "args": ["scripts/start.sh", "."]
-    }
-  }
-}
-```
-
-### Aider
-
-```bash
-aider --mcp "bash scripts/start.sh ."
-```
-
-Or in `.aider.conf.yml`:
-
-```yaml
-mcp: bash scripts/start.sh .
-```
-
-### All MCP configs in one file
-
-See [MCP_CONFIGS.md](MCP_CONFIGS.md) for every supported client in a single copy-paste location.
+The AI detects Dbasement and initializes project memory automatically. From that point on, every session picks up where the last one left off.
 
 ---
 
@@ -235,81 +122,34 @@ After a change: AI updates only the affected section (<2s)
 
 ## Available MCP Tools
 
-### Retrieval
-
-| Tool | What it returns | When to use |
-|------|----------------|-------------|
-| `get_project_summary` | 200-400 word project description | New session, new contributor |
-| `get_architecture` | Frontend/backend/service breakdown | Understanding structure |
-| `get_features` | List of features | Feature planning |
-| `get_api` | Endpoints, auth, request/response | API work |
-| `get_database` | Tables, collections, relations | Schema changes |
-| `get_dependencies` | Why each dependency exists | Dep management |
-| `get_recent_changes` | Recent changelog entries | "What changed?" |
-| `get_known_issues` | Open issues with confidence | Bug fixes |
-| `get_todo` | TODO/FIXME items | Task planning |
-| `get_design_decisions` | Decision history with reasons | Understanding why |
-| `get_glossary` | Project terminology | Onboarding |
-
-### Mutation
-
-| Tool | What it does |
+| Tool | Description |
 |------|-------------|
-| `initialize_project` | Set up memory for a new project |
-| `update_memory` | Update a specific section (with confidence score) |
-| `add_design_decision` | Record a decision with reasoning |
+| `get_project_summary` | Get concise project description |
+| `get_architecture` | Get architecture breakdown |
+| `get_features` | Get feature list |
+| `get_api` | Get API documentation |
+| `get_database` | Get database schema |
+| `get_dependencies` | Get dependency documentation |
+| `get_recent_changes` | Get recent changelog |
+| `get_known_issues` | Get unresolved issues |
+| `get_todo` | Get TODO items |
+| `get_design_decisions` | Get decision history |
+| `get_glossary` | Get project terminology |
+| `search_memory` | Full-text search across all memory |
+| `initialize_project` | Initialize memory with project summary and architecture |
+| `update_memory` | Update a memory section |
+| `add_design_decision` | Record a design decision |
 | `add_todo` | Add a TODO item |
 | `add_known_issue` | Add a known issue |
-| `resolve_known_issue` | Mark issue as resolved |
-| `mark_todo_done` | Mark TODO as complete |
-
-### Analysis
-
-| Tool | What it does |
-|------|-------------|
-| `search_memory` | Full-text search across all sections |
-| `refresh_project` | Check for meaningful git changes |
-
----
-
-## AI Agent Workflow
-
-For detailed workflows, rules, and examples, see:
-- [AGENTS.md](AGENTS.md) — Full AI agent guide with installation rules, workflows, and tool reference
-- [AI_QUICKSTART.md](AI_QUICKSTART.md) — One-page machine-readable quickstart
-
-### First Session
-
-```
-1. Read project files (README, configs, source code)
-2. Call initialize_project with summary and architecture
-3. Call update_memory for each section you discover
-4. Call add_design_decision for architectural choices
-```
-
-### Returning Sessions
-
-```
-1. Call get_project_summary (minimum context)
-2. Call get_recent_changes to see what's new
-3. Call get_todo for pending tasks
-4. Call other get_* tools only as needed for the task
-```
-
-### After Code Changes
-
-```
-1. Call refresh_project to check git diff
-2. If changes detected, read the actual changes
-3. Call update_memory for affected sections
-4. Call add_design_decision if warranted
-```
+| `refresh_project` | Check for meaningful changes |
+| `resolve_known_issue` | Mark issue resolved |
+| `mark_todo_done` | Mark TODO complete |
 
 ---
 
 ## Release Assets
 
-Pre-built binaries for every release:
+Pre-built binaries are available for every [release](https://github.com/shs3131/dbasement/releases):
 
 | Platform | Architecture | Archive |
 |----------|-------------|---------|
@@ -323,23 +163,6 @@ Each archive contains a single binary named `dbasement` (or `dbasement.exe` on W
 
 ---
 
-## Features
-
-- **Persistent memory** — Project knowledge survives between AI sessions
-- **Structured knowledge** — Summary, architecture, API, database, dependencies, design decisions, glossary, known issues, TODOs, changelog
-- **Incremental updates** — Never regenerate the entire memory; update only what changed
-- **Smart retrieval** — AI retrieves only the section it needs, not the whole database
-- **Git-aware** — Detects changes via `git diff`; no full rescans
-- **File watching** — Optional poll-based watcher for non-git changes
-- **Confidence system** — 0-100% confidence scoring; low-confidence updates marked or ignored
-- **Small change filtering** — Ignores formatting, comments, whitespace, typo fixes
-- **Multi-agent** — Works with Claude Code, Cursor, Codex CLI, Gemini CLI, Cline, Roo Code, Aider, and any MCP client
-- **Zero infrastructure** — SQLite database, no vector DB, no Elasticsearch, no Redis, no cloud
-- **Single binary** — ~11 MB, no runtime dependencies
-- **Cross-platform** — Windows, macOS, Linux
-
----
-
 ## FAQ
 
 ### Does Dbasement send my code anywhere?
@@ -348,7 +171,7 @@ No. Dbasement runs entirely locally. It never makes network requests, sends tele
 
 ### Does Dbasement modify my code?
 
-No. Dbasement is read-only with respect to your project files. It only writes to `.dbasement/memory.db`. It never touches your source code.
+No. Dbasement is read-only with respect to your project files. It only writes to `.dbasement/memory.db`.
 
 ### Can I use Dbasement without Git?
 
@@ -356,19 +179,11 @@ Yes. The file watcher detects changes via SHA-256 hash comparison. Git integrati
 
 ### How big does the database get?
 
-The `.dbasement/memory.db` file typically stays under 1 MB for most projects. Each memory section is a few hundred bytes to a few kilobytes.
+The `.dbasement/memory.db` file typically stays under 1 MB for most projects.
 
 ### Can multiple AI agents use Dbasement simultaneously?
 
-Yes. Dbasement supports multiple connections. SQLite handles read concurrency natively with WAL mode. Write operations are serialized.
-
-### Will Dbasement slow down my AI?
-
-No. Memory retrieval takes <20ms. Memory updates take <2s. The AI spends less time understanding the project, not more.
-
-### How do I update the memory?
-
-The AI updates memory automatically via `update_memory`. You can also manually trigger a refresh with `refresh_project`.
+Yes. SQLite handles read concurrency natively with WAL mode. Write operations are serialized.
 
 ### How do I remove Dbasement?
 
@@ -382,17 +197,14 @@ rm -rf .dbasement/
 
 | File | Purpose |
 |------|---------|
-| [AGENTS.md](AGENTS.md) | AI agent guide: installation rules, workflows, tool reference |
-| [AI_QUICKSTART.md](AI_QUICKSTART.md) | One-page machine-readable quickstart for LLMs |
-| [MCP_CONFIGS.md](MCP_CONFIGS.md) | MCP configuration for every supported AI client |
+| [AI_QUICKSTART.md](AI_QUICKSTART.md) | First file AI agents should read |
+| [AGENTS.md](AGENTS.md) | Comprehensive AI agent guide |
+| [MCP_CONFIGS.md](MCP_CONFIGS.md) | MCP configuration for every AI client |
 | [INSTALL.md](INSTALL.md) | Platform-specific installation instructions |
-| [GET_STARTED.md](GET_STARTED.md) | Human-friendly getting started guide |
 | [DEVELOPMENT.md](DEVELOPMENT.md) | Building from source (contributors only) |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contributing guidelines |
 
-## Project Status
-
-Dbasement is in **active development**. The core functionality is stable and usable.
+---
 
 ## License
 

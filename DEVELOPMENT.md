@@ -1,8 +1,6 @@
 # Development Guide
 
-**This guide is for contributors who need to build Dbasement from source.**
-
-> Most users should download pre-built binaries from [GitHub Releases](https://github.com/shs3131/dbasement/releases). No Go installation required.
+**Source builds are for contributors only. Users should download pre-built binaries from [GitHub Releases](https://github.com/shs3131/dbasement/releases).**
 
 ## Prerequisites
 
@@ -157,7 +155,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | ./dbasement 
 4. Add memory methods in `internal/memory/memory.go` if needed
 5. Add storage methods in `internal/storage/storage.go` if needed
 6. Write tests
-7. Update README.md tool table
+7. Update README.md tool table if adding a new public tool
 
 ## Performance Targets
 
