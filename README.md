@@ -10,6 +10,7 @@
 <div align="center">
 
 [![CI](https://github.com/shs3131/dbasement/actions/workflows/ci.yml/badge.svg)](https://github.com/shs3131/dbasement/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/shs3131/dbasement?logo=github)](https://github.com/shs3131/dbasement/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/shs3131/dbasement)](https://goreportcard.com/report/github.com/shs3131/dbasement)
 [![Go Version](https://img.shields.io/badge/go-1.26+-00ADD8?logo=go)](https://go.dev)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
@@ -53,28 +54,75 @@ focused.
 - **Single binary** — ~11 MB, no runtime dependencies
 - **Cross-platform** — Windows, macOS, Linux
 
-## Quick Start
+## Installation
 
-```bash
-# Install
-go install github.com/shs3131/dbasement/cmd/dbasement@latest
+You don't need Go installed to use Dbasement. Pre-built binaries are available
+for all major platforms.
 
-# Configure your AI client (example for Claude Code)
-# Add to ~/.claude/settings.json:
-# {
-#   "mcpServers": {
-#     "dbasement": {
-#       "command": "dbasement",
-#       "args": ["--project", "/path/to/your/project"]
-#     }
-#   }
-# }
+### Download a Release
 
-# Start using it
-# The AI will automatically initialize and maintain memory.
+1. Go to the [Releases page](https://github.com/shs3131/dbasement/releases).
+2. Download the archive for your operating system:
+   - **Windows**: `dbasement-windows-amd64.zip`
+   - **Linux (x86_64)**: `dbasement-linux-amd64.tar.gz`
+   - **Linux (ARM64)**: `dbasement-linux-arm64.tar.gz`
+   - **macOS (Intel)**: `dbasement-darwin-amd64.tar.gz`
+   - **macOS (Apple Silicon)**: `dbasement-darwin-arm64.tar.gz`
+3. Extract the archive and run the binary.
+
+### Quick Start
+
+**Windows (PowerShell):**
+
+```powershell
+# Extract
+Expand-Archive -Path dbasement-windows-amd64.zip -DestinationPath .
+
+# Run
+.\dbasement.exe --project C:\path\to\your\project
 ```
 
-See [GET_STARTED.md](GET_STARTED.md) for detailed setup and usage.
+**Linux / macOS:**
+
+```bash
+# Extract
+tar xzf dbasement-linux-amd64.tar.gz
+
+# Make executable and run
+chmod +x dbasement
+./dbasement --project /path/to/your/project
+```
+
+### Building from Source
+
+Requires [Go 1.26+](https://go.dev/dl).
+
+```bash
+git clone https://github.com/shs3131/dbasement.git
+cd dbasement
+go build -o dbasement ./cmd/dbasement/
+```
+
+The binary is placed in the current directory. Move it anywhere in your `PATH`
+for system-wide access.
+
+### AI Client Configuration
+
+Configure your AI client to use Dbasement as an MCP server:
+
+```json
+{
+  "mcpServers": {
+    "dbasement": {
+      "command": "/absolute/path/to/dbasement",
+      "args": ["--project", "/path/to/your/project"]
+    }
+  }
+}
+```
+
+See [GET_STARTED.md](GET_STARTED.md) for per-client configuration examples and
+detailed setup instructions.
 
 ## How It Works
 
@@ -265,8 +313,17 @@ Any client supporting the MCP stdio transport:
 
 ### Step 1: Install Dbasement
 
+**Option A — Download a release binary (recommended, no Go needed):**
+
+Download the latest binary from the
+[Releases page](https://github.com/shs3131/dbasement/releases) and extract it.
+
+**Option B — Build from source:**
+
 ```bash
-go install github.com/shs3131/dbasement/cmd/dbasement@latest
+git clone https://github.com/shs3131/dbasement.git
+cd dbasement
+go build -o dbasement ./cmd/dbasement/
 ```
 
 ### Step 2: Configure AI Client

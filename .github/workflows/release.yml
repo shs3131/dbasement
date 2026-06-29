@@ -1,0 +1,129 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            ext: ""
+            archive: tar.gz
+          - goos: linux
+            goarch: arm64
+            ext: ""
+            archive: tar.gz
+          - goos: darwin
+            goarch: amd64
+            ext: ""
+            archive: tar.gz
+          - goos: darwin
+            goarch: arm64
+            ext: ""
+            archive: tar.gz
+          - goos: windows
+            goarch: amd64
+            ext: .exe
+            archive: zip
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+          cache: true
+
+      - name: Build binary
+        run: |
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
+          go build -ldflags="-s -w" \
+            -o "dist/dbasement-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}" \
+            ./cmd/dbasement/
+
+      - name: Create archive (Unix)
+        if: matrix.archive == 'tar.gz'
+        run: |
+          cd dist
+          tar czf "dbasement-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz" \
+            "dbasement-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
+
+      - name: Create archive (Windows)
+        if: matrix.archive == 'zip'
+        run: |
+          Compress-Archive -Path "dist/dbasement-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}" \
+            -DestinationPath "dist/dbasement-${{ matrix.goos }}-${{ matrix.goarch }}.zip"
+        shell: pwsh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbasement-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/dbasement-${{ matrix.goos }}-${{ matrix.goarch }}.${{ matrix.archive }}
+
+  create-release:
+    needs: goreleaser
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List artifacts
+        run: find artifacts -type f
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          {
+            echo 'NOTES<<EOF'
+            echo '## Downloads'
+            echo ''
+            echo '| Platform | Architecture | Archive |'
+            echo '|----------|-------------|---------|'
+            for f in artifacts/*/*.tar.gz artifacts/*/*.zip; do
+              name=$(basename "$f")
+              case "$name" in
+                *linux-amd64*)    plat="Linux"     arch="x86_64" ;;
+                *linux-arm64*)    plat="Linux"     arch="ARM64"  ;;
+                *darwin-amd64*)   plat="macOS"     arch="Intel"  ;;
+                *darwin-arm64*)   plat="macOS"     arch="Apple Silicon" ;;
+                *windows-amd64*)  plat="Windows"   arch="x86_64" ;;
+              esac
+              echo "| $plat | $arch | \`$name\` |"
+            done
+            echo ''
+            echo '---'
+            echo ''
+            if [ -f CHANGELOG.md ]; then
+              awk '/^## \[/{count++} count==1{print} count>1{exit}' CHANGELOG.md
+            fi
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Dbasement ${{ github.ref_name }}
+          body: ${{ steps.notes.outputs.NOTES }}
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/*/*.tar.gz
+            artifacts/*/*.zip
