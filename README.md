@@ -329,6 +329,48 @@ After a change: AI updates only the affected section (<2s)
 
 ---
 
+## AI Agent Workflow
+
+This section is for AI agents that use Dbasement. For detailed workflows,
+diagrams, and examples, see [AGENTS.md](AGENTS.md) and
+[AI_QUICKSTART.md](AI_QUICKSTART.md).
+
+### First Session
+
+```
+1. Read project files (README, configs, source code)
+2. Call initialize_project with summary and architecture
+3. Call update_memory for each section you discover
+4. Call add_design_decision for architectural choices
+```
+
+### Returning Sessions
+
+```
+1. Call get_project_summary (minimum context)
+2. Call get_recent_changes to see what's new
+3. Call get_todo for pending tasks
+4. Call other get_* tools only as needed for the task
+```
+
+### After Code Changes
+
+```
+1. Call refresh_project to check git diff
+2. If changes detected, read the actual changes
+3. Call update_memory for affected sections
+4. Call add_design_decision if warranted
+```
+
+### Token-Saving Rules
+
+- Start with `get_project_summary`. Everything else is optional.
+- Don't call all `get_*` tools — only the ones your task needs.
+- One `search_memory` call is cheaper than 5 separate `get_*` calls.
+- Cache results in your reasoning; don't re-fetch in the same session.
+
+---
+
 ## Complete End-to-End Walkthrough
 
 ### Step 1: Install Dbasement
@@ -501,6 +543,17 @@ This completely removes all stored memory. The project is unaffected.
 | Idle CPU | ~0% |
 
 ---
+
+## Documentation
+
+| File | Purpose |
+|------|---------|
+| [AGENTS.md](AGENTS.md) | Workflow diagrams, session examples, tool usage guide for AI agents |
+| [AI_QUICKSTART.md](AI_QUICKSTART.md) | One-page quickstart for LLMs — what to call and when |
+| [GET_STARTED.md](GET_STARTED.md) | Human-friendly getting started guide |
+| [INSTALL.md](INSTALL.md) | Platform-specific installation instructions |
+| [DEVELOPMENT.md](DEVELOPMENT.md) | Building from source, testing, contributing |
+| [ROADMAP.md](ROADMAP.md) | Planned features and project direction |
 
 ## FAQ
 

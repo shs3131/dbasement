@@ -167,7 +167,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 	tools := []map[string]interface{}{
 		{
 			"name":        "initialize_project",
-			"description": "Initialize project memory database. Scans repository and creates initial project snapshot.",
+			"description": "FIRST tool in a new project. Call this once to create the project memory database. Requires project_path, summary, and optional architecture. Do NOT call if already initialized (check is handled server-side). Call BEFORE any other mutation tools.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{
@@ -189,7 +189,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "get_project_summary",
-			"description": "Get a concise project summary (~200-400 words). Use this to understand what the project is about.",
+			"description": "Retrieve overall project summary (200-400 words). Call this FIRST when starting a new session to re-establish project context. Use BEFORE get_architecture, get_features, or any other retrieval tool.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{},
@@ -197,7 +197,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "get_architecture",
-			"description": "Get the project architecture breakdown: frontend, backend, services, modules, communication patterns.",
+			"description": "Retrieve architecture breakdown. Call this AFTER get_project_summary when you need to understand project structure (frontend, backend, services, modules). Do NOT call if you only need the project summary.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{},
@@ -205,7 +205,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "get_features",
-			"description": "Get the list of project features.",
+			"description": "Retrieve the list of project features. Call this when planning new feature work or when asked about what the project does. Do NOT call if you only need the project summary.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{},
@@ -213,7 +213,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "get_api",
-			"description": "Get API documentation: endpoints, authentication, request/response formats.",
+			"description": "Retrieve API documentation (endpoints, auth, request/response formats). Call this BEFORE making API changes or when asked about API endpoints. Do NOT call for non-API work.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{},
@@ -221,7 +221,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "get_database",
-			"description": "Get database schema: tables, collections, relations, indexes.",
+			"description": "Retrieve database schema (tables, collections, relations, indexes). Call this BEFORE making schema changes or when asked about data models. Do NOT call for frontend-only work.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{},
@@ -229,7 +229,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "get_dependencies",
-			"description": "Get project dependencies and why each major dependency exists.",
+			"description": "Retrieve project dependencies and why each major dependency exists. Call this before adding or removing dependencies, or when asked about the tech stack. Do NOT call for routine feature work.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{},
@@ -237,7 +237,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "get_recent_changes",
-			"description": "Get recent meaningful project changes from the changelog.",
+			"description": "Retrieve recent meaningful project changes from the changelog. Call this when asked 'what changed?' or at the start of a session to review recent activity. Can be called multiple times per session.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{},
@@ -245,7 +245,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "get_known_issues",
-			"description": "Get known project issues and their resolution status.",
+			"description": "Retrieve unresolved project issues with confidence scores. Call this when fixing bugs or when asked about known problems. Do NOT call during initial project setup.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{},
@@ -253,7 +253,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "get_todo",
-			"description": "Get TODO/FIXME items collected from codebase and AI observations.",
+			"description": "Retrieve TODO/FIXME items. Call this when planning work or when asked about pending tasks. Set include_done=true to also see completed items. Do NOT call more than once per session unless items have changed.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{
@@ -266,7 +266,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "get_design_decisions",
-			"description": "Get chronological design decisions with reasoning.",
+			"description": "Retrieve chronological design decisions with reasoning. Call this when you need to understand why something was built a certain way. Do NOT call for routine context retrieval.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{},
@@ -274,7 +274,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "get_glossary",
-			"description": "Get project-specific terminology and definitions.",
+			"description": "Retrieve project-specific terminology and definitions. Call this when encountering unfamiliar project terms. Do NOT call if you understand the domain terminology.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{},
@@ -282,13 +282,13 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "search_memory",
-			"description": "Search all project memory for specific information.",
+			"description": "Full-text search across ALL memory sections at once. Call this when you need information but don't know which section contains it. Useful as an alternative to calling multiple get_* tools. Do NOT call if you already know which section has the answer.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{
 					"query": map[string]interface{}{
 						"type":        "string",
-						"description": "Search query",
+						"description": "Free-text search query across all memory sections",
 					},
 				},
 				"required": []string{"query"},
@@ -296,7 +296,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "update_memory",
-			"description": "Update a specific section of project memory. Provide confidence score (0-100). Updates with confidence >= 85 are auto-applied; below 70 are ignored.",
+			"description": "Update a specific memory section after learning new information. Call this AFTER reading project files and identifying new information. Requires confidence score: >=85 auto-applied, 70-84 marked AI-inferred, <70 ignored. Do NOT call for changes you are unsure about (confidence <70). Do NOT use to initialize a project (use initialize_project instead).",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{
@@ -310,7 +310,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 					},
 					"confidence": map[string]interface{}{
 						"type":        "integer",
-						"description": "Confidence score 0-100",
+						"description": "Confidence score 0-100. >=85: auto-applied. 70-84: applied marked inferred. <70: ignored.",
 					},
 					"changelog": map[string]interface{}{
 						"type":        "string",
@@ -322,7 +322,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "add_design_decision",
-			"description": "Record a design decision with reasoning for future reference.",
+			"description": "Record a design decision with reasoning. Call this AFTER making an architectural choice or when you discover why something was designed a certain way. Always include the reason. Do NOT call for trivial implementation choices.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{
@@ -340,7 +340,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "add_todo",
-			"description": "Add a TODO item to project memory.",
+			"description": "Add a TODO item to project memory. Call this when you discover pending work, missing features, or improvements. Source can be 'ai', 'code', or 'user'. Do NOT use for items already tracked in the codebase's own TODO comments.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{
@@ -358,7 +358,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "add_known_issue",
-			"description": "Record a known issue or bug in project memory.",
+			"description": "Record a known issue or bug with confidence score. Call this when you discover a bug or significant problem. Do NOT call for minor warnings or speculative issues. Use with confidence >=70.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{
@@ -376,7 +376,7 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "refresh_project",
-			"description": "Check for uncommitted changes and analyze if they are meaningful. Does NOT rescan the whole repository.",
+			"description": "Check for uncommitted git changes and analyze if they are meaningful. Call this when the user says something changed or when you need to check for updates. Does NOT rescan the whole repository. Can be called multiple times. Do NOT call if you are about to initialize a new project.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{},
@@ -384,13 +384,13 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "resolve_known_issue",
-			"description": "Mark a known issue as resolved.",
+			"description": "Mark a known issue as resolved. Call this AFTER fixing a bug or addressing an issue. Requires the issue ID from get_known_issues. Do NOT call for issues that haven't been verified as fixed.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{
 					"id": map[string]interface{}{
 						"type":        "integer",
-						"description": "Issue ID to resolve",
+						"description": "Issue ID to resolve (from get_known_issues)",
 					},
 				},
 				"required": []string{"id"},
@@ -398,13 +398,13 @@ func (s *Server) handleToolList(id json.RawMessage) {
 		},
 		{
 			"name":        "mark_todo_done",
-			"description": "Mark a TODO item as completed.",
+			"description": "Mark a TODO item as completed. Call this AFTER completing a task. Requires the TODO ID from get_todo. Do NOT call for items that aren't actually finished.",
 			"inputSchema": map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{
 					"id": map[string]interface{}{
 						"type":        "integer",
-						"description": "TODO item ID",
+						"description": "TODO item ID (from get_todo)",
 					},
 				},
 				"required": []string{"id"},
