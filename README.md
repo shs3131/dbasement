@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/shs3131/dbasement/main/assets/logo.svg" alt="Dbasement Logo" width="120" height="120">
+  <img src="https://raw.githubusercontent.com/shs3131/dbasement/master/assets/logo.svg" alt="Dbasement Logo" width="120" height="120">
   <h1>Dbasement</h1>
   <p><strong>Persistent project memory for AI coding agents.</strong></p>
   <p>Never explain your project twice. Your AI remembers everything.</p>
