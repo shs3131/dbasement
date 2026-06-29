@@ -44,22 +44,12 @@ func (s *Server) SetIO(r io.Reader, w io.Writer) {
 
 func (s *Server) Run() error {
 	for {
-		line, err := s.reader.ReadString('\n')
+		msg, err := s.readMessage()
 		if err != nil {
 			if err == io.EOF || s.closed {
 				return nil
 			}
 			return fmt.Errorf("read: %w", err)
-		}
-
-		line = strings.TrimSpace(line)
-		if line == "" {
-			continue
-		}
-
-		var msg json.RawMessage
-		if err := json.Unmarshal([]byte(line), &msg); err != nil {
-			continue
 		}
 
 		var base struct {
@@ -72,6 +62,62 @@ func (s *Server) Run() error {
 		}
 
 		s.handleMessage(msg, base)
+	}
+}
+
+func (s *Server) readMessage() (json.RawMessage, error) {
+	for {
+		line, err := s.reader.ReadString('\n')
+		if err != nil {
+			return nil, err
+		}
+
+		line = strings.TrimSuffix(line, "\r")
+		line = strings.TrimSuffix(line, "\n")
+
+		if line == "" {
+			continue
+		}
+
+		if strings.HasPrefix(line, "Content-Length:") {
+			parts := strings.SplitN(line, ":", 2)
+			if len(parts) != 2 {
+				continue
+			}
+			n := 0
+			fmt.Sscanf(strings.TrimSpace(parts[1]), "%d", &n)
+			if n <= 0 {
+				continue
+			}
+
+			for {
+				blank, err := s.reader.ReadString('\n')
+				if err != nil {
+					return nil, err
+				}
+				if blank == "\n" || blank == "\r\n" {
+					break
+				}
+			}
+
+			body := make([]byte, n)
+			_, err := io.ReadFull(s.reader, body)
+			if err != nil {
+				return nil, err
+			}
+
+			var raw json.RawMessage
+			if err := json.Unmarshal(body, &raw); err != nil {
+				continue
+			}
+			return raw, nil
+		}
+
+		var raw json.RawMessage
+		if err := json.Unmarshal([]byte(line), &raw); err != nil {
+			continue
+		}
+		return raw, nil
 	}
 }
 
@@ -872,7 +918,9 @@ func (s *Server) writeJSON(v interface{}) {
 		log.Printf("Error marshaling response: %v", err)
 		return
 	}
-	fmt.Fprintln(s.writer, string(data))
+	header := fmt.Sprintf("Content-Length: %d\r\n\r\n", len(data))
+	fmt.Fprint(s.writer, header)
+	fmt.Fprint(s.writer, string(data))
 }
 
 func (s *Server) Close() {

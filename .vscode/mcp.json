@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "dbasement": {
+      "type": "stdio",
+      "command": "${workspaceFolder}/dbasement.exe",
+      "args": ["--project", "${workspaceFolder}"]
+    }
+  }
+}
