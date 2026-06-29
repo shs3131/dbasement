@@ -70,11 +70,7 @@ jobs:
 
       - name: Create archive (Windows)
         if: matrix.archive == 'zip'
-        run: |
-          cd dist
-          Compress-Archive -Path "dbasement-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}" \
-            -DestinationPath "$pwd/dbasement-${{ matrix.goos }}-${{ matrix.goarch }}.zip"
-        shell: pwsh
+        run: 7z a "dist/dbasement-${{ matrix.goos }}-${{ matrix.goarch }}.zip" "dist/dbasement-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
