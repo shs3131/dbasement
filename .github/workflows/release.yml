@@ -46,8 +46,16 @@ jobs:
           go-version: "1.26"
           cache: true
 
+      - name: Debug workspace
+        run: |
+          pwd
+          ls -la
+          ls -la cmd/ 2>/dev/null || echo "NO cmd/ DIR"
+          ls -la cmd/dbasement/ 2>/dev/null || echo "NO cmd/dbasement/ DIR"
+
       - name: Build binary
         run: |
+          mkdir -p dist
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
           go build -ldflags="-s -w" \
             -o "dist/dbasement-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}" \
